@@ -5,7 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.mlsa_uet_nc.repeatalarm.presentation.ui.scheduled_list.AlarmListScreen
+import com.mlsa_uet_nc.repeatalarm.presentation.ui.alarm_list.AlarmListScreen
 import com.mlsa_uet_nc.repeatalarm.presentation.ui.alarm_quick.QuickScreen
 import com.mlsa_uet_nc.repeatalarm.presentation.ui.settings.SettingsScreen
 
