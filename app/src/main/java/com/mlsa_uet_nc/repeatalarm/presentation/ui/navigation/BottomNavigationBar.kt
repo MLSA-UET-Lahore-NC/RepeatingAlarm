@@ -11,8 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.NavController
 import com.mlsa_uet_nc.repeatalarm.R
 
 sealed class BottomNavItem(val route: String, val title: String, val icon: @Composable () -> Unit) {
@@ -22,10 +21,11 @@ sealed class BottomNavItem(val route: String, val title: String, val icon: @Comp
 }
 
 @Composable
-fun BottomNavigationBar(navController: NavHostController) {
+fun BottomNavigationBar(
+    currentRoute : String?,
+    navController: NavController
+) {
     val items = listOf(BottomNavItem.Quick, BottomNavItem.List, BottomNavItem.Settings)
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
 
     NavigationBar(
         modifier = Modifier

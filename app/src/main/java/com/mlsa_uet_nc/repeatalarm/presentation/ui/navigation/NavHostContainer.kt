@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.mlsa_uet_nc.repeatalarm.presentation.ui.add_alarm.AddAlarmBottomSheet
 import com.mlsa_uet_nc.repeatalarm.presentation.ui.alarm_list.AlarmListScreen
 import com.mlsa_uet_nc.repeatalarm.presentation.ui.alarm_quick.QuickScreen
 import com.mlsa_uet_nc.repeatalarm.presentation.ui.settings.SettingsScreen
@@ -15,5 +16,6 @@ fun NavHostContainer(navController: NavHostController, modifier: Modifier = Modi
         composable(BottomNavItem.Quick.route) { QuickScreen() }
         composable(BottomNavItem.List.route) { AlarmListScreen() }
         composable(BottomNavItem.Settings.route) { SettingsScreen() }
+        composable(Screen.AddAlarm.route){ AddAlarmBottomSheet() }
     }
 }
