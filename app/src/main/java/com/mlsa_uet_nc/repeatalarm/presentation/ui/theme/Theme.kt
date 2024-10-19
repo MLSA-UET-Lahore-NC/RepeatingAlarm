@@ -1,4 +1,4 @@
-package com.mlsa_uet_nc.repeatalarm.ui.theme
+package com.mlsa_uet_nc.repeatalarm.presentation.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
