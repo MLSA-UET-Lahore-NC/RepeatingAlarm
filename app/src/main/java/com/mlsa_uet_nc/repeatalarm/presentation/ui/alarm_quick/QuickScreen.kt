@@ -24,7 +24,7 @@ import java.time.LocalTime
 fun QuickScreen() {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
 
-        var time by remember { mutableStateOf(LocalTime.of(12,30)) }
+        var time by remember { mutableStateOf(LocalTime.of(0,0)) }
 
         Column(
             Modifier.fillMaxSize(),
@@ -45,9 +45,11 @@ fun QuickScreen() {
                 time = snappedTime
             }
 
-            Button(onClick = {
-                //Todo: start quick alarm
-            }) {
+            Button(
+                onClick = {
+                    //Todo: start quick alarm
+                }, enabled = time != LocalTime.of(0, 0)
+            ) {
                 Text(
                     "Start Quick Alarm",
                     Modifier.padding(6.dp),
