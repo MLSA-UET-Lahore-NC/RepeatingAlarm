@@ -32,8 +32,7 @@ fun MainScreen(
     )
 
     Scaffold(
-        //modifier = Modifier.nestedScroll(scrollBarBehavior.nestedScrollConnection),
-        //TODO: uncomment this line
+        modifier = Modifier.nestedScroll(scrollBarBehavior.nestedScrollConnection),
         topBar = {
             when (currentRoute) {
                 BottomNavItem.List.route -> {
