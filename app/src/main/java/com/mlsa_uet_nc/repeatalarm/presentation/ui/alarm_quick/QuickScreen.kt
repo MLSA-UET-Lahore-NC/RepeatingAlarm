@@ -9,9 +9,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ButtonDefaults.buttonColors
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -60,6 +62,7 @@ fun QuickScreen() {
                 }
                 Button(
                     onClick = {
+                        isPaused = false
                         timerRunning = true
                         startTime = time
                         GlobalScope.launch {
@@ -97,12 +100,13 @@ fun QuickScreen() {
                             progress = { progress / 100f },
                             modifier = Modifier.size(236.dp),
                             strokeWidth = 14.dp, // Adjust stroke width
-                            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                            trackColor = colorScheme.surfaceVariant,
+                            strokeCap = StrokeCap.Round,
                         )
                         Text(
                             text = "${time.hour}:${time.minute}:${time.second}",
                             style = MaterialTheme.typography.headlineLarge,
-                            color = MaterialTheme.colorScheme.primary,
+                            color = colorScheme.primary,
                             modifier = Modifier.align(Alignment.Center)
                         )
                     }
@@ -111,7 +115,11 @@ fun QuickScreen() {
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    Button(onClick = {
+                    Button(
+                        colors = buttonColors(
+                            containerColor = if (isPaused) colorScheme.primary else colorScheme.outline
+                        ),
+                        onClick = {
                         isPaused = !isPaused
                     }) {
                         Text(
@@ -121,7 +129,7 @@ fun QuickScreen() {
                         )
                     }
                     Button(
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.outline),
+                        colors = buttonColors(containerColor = colorScheme.outline),
                         onClick = {
                             progress = 0
                             timerRunning = false
