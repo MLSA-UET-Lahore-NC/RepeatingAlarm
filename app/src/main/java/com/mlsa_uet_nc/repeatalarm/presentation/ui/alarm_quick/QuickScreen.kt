@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.commandiron.wheel_picker_compose.WheelTimePicker
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -78,7 +79,7 @@ class QuickAlarmViewModel : ViewModel() {
 }
 
 @Composable
-fun QuickScreen(viewModel: QuickAlarmViewModel = androidx.lifecycle.viewmodel.compose.viewModel()) {
+fun QuickScreen(viewModel: QuickAlarmViewModel = viewModel<QuickAlarmViewModel>()) {
     val time by viewModel.time.collectAsState()
     val timerRunning by viewModel.timerRunning.collectAsState()
     val progress by viewModel.progress.collectAsState()
