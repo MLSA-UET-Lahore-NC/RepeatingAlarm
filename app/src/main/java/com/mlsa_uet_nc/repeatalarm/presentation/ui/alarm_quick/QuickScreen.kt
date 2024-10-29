@@ -1,87 +1,111 @@
 package com.mlsa_uet_nc.repeatalarm.presentation.ui.alarm_quick
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults.buttonColors
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.material3.Text
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.commandiron.wheel_picker_compose.WheelTimePicker
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
 import java.time.LocalTime
 
+class QuickAlarmViewModel : ViewModel() {
+    private var timerJob: Job? = null
+
+    private val _time = MutableStateFlow(LocalTime.of(0, 0))
+    val time = _time.asStateFlow()
+
+    private val _timerRunning = MutableStateFlow(false)
+    val timerRunning = _timerRunning.asStateFlow()
+
+    private val _startTime = MutableStateFlow(LocalTime.of(0, 0))
+
+    private val _progress = MutableStateFlow(0)
+    val progress = _progress.asStateFlow()
+
+    private val _isPaused = MutableStateFlow(false)
+    val isPaused = _isPaused.asStateFlow()
+
+    fun setTime(newTime: LocalTime) {
+        _time.value = newTime
+    }
+
+    fun startTimer() {
+        _isPaused.value = false
+        _timerRunning.value = true
+        _startTime.value = _time.value
+
+        timerJob = viewModelScope.launch {
+            while (_timerRunning.value) {
+                if (!_isPaused.value) {
+                    _time.value = _time.value.minusSeconds(1)
+                }
+
+                val totalSeconds = java.time.Duration.between(LocalTime.of(0, 0), _startTime.value).seconds
+                val remainingSeconds = java.time.Duration.between(LocalTime.of(0, 0), _time.value).seconds
+                _progress.value = ((totalSeconds - remainingSeconds).toDouble() / totalSeconds * 100).toInt()
+
+                if (_time.value == LocalTime.of(0, 0)) {
+                    stopTimer()
+                    break
+                }
+                delay(1000L)
+            }
+        }
+    }
+
+    fun togglePause() {
+        _isPaused.value = !_isPaused.value
+    }
+
+    fun stopTimer() {
+        _timerRunning.value = false
+        _progress.value = 0
+        _time.value = _startTime.value
+        timerJob?.cancel()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        timerJob?.cancel()
+    }
+}
+
 @Composable
-fun QuickScreen() {
+fun QuickScreen(viewModel: QuickAlarmViewModel = androidx.lifecycle.viewmodel.compose.viewModel()) {
+    val time by viewModel.time.collectAsState()
+    val timerRunning by viewModel.timerRunning.collectAsState()
+    val progress by viewModel.progress.collectAsState()
+    val isPaused by viewModel.isPaused.collectAsState()
+
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-
-        var time by remember { mutableStateOf(LocalTime.of(0,0)) }
-        var timerRunning by remember { mutableStateOf(false) }
-        var startTime by remember { mutableStateOf(LocalTime.of(0,0))}
-        var progress by remember { mutableStateOf(0) }
-        var isPaused by remember { mutableStateOf(false) }
-
         Column(
             Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
             Text(
                 text = "Set Quick Alarm",
                 style = MaterialTheme.typography.headlineMedium,
             )
 
-            if(!timerRunning) {
+            if (!timerRunning) {
                 WheelTimePicker(
                     Modifier.padding(vertical = 14.dp),
                     size = DpSize(200.dp, 200.dp),
                     startTime = time,
                 ) { snappedTime ->
-                    time = snappedTime
+                    viewModel.setTime(snappedTime)
                 }
                 Button(
-                    onClick = {
-                        isPaused = false
-                        timerRunning = true
-                        startTime = time
-                        GlobalScope.launch {
-                            while (timerRunning) {
-                                if(!isPaused) time = time.minusSeconds(1)
-
-                                val totalSeconds = java.time.Duration.between(LocalTime.of(0, 0), startTime).seconds
-                                val remainingSeconds = java.time.Duration.between(LocalTime.of(0, 0), time).seconds
-                                progress = ((totalSeconds - remainingSeconds).toDouble() / totalSeconds * 100).toInt()
-
-                                if(time == LocalTime.of(0, 0)) {
-                                    timerRunning = false
-                                    time = startTime
-                                    break
-                                }
-                                delay(1000L)
-                            }
-                        }
-                    }, enabled = time != LocalTime.of(0, 0)
+                    onClick = { viewModel.startTimer() },
+                    enabled = time != LocalTime.of(0, 0)
                 ) {
                     Text(
                         "Start Quick Alarm",
@@ -89,9 +113,8 @@ fun QuickScreen() {
                         style = MaterialTheme.typography.bodyLarge
                     )
                 }
-            }
-            else if(timerRunning) {
-                Box (modifier = Modifier.padding(vertical = 48.dp)) {
+            } else {
+                Box(modifier = Modifier.padding(vertical = 48.dp)) {
                     Box(
                         modifier = Modifier.size(200.dp),
                         contentAlignment = Alignment.Center
@@ -99,14 +122,14 @@ fun QuickScreen() {
                         CircularProgressIndicator(
                             progress = { progress / 100f },
                             modifier = Modifier.size(236.dp),
-                            strokeWidth = 14.dp, // Adjust stroke width
-                            trackColor = colorScheme.surfaceVariant,
+                            strokeWidth = 14.dp,
+                            trackColor = MaterialTheme.colorScheme.surfaceVariant,
                             strokeCap = StrokeCap.Round,
                         )
                         Text(
                             text = "${time.hour}:${time.minute}:${time.second}",
                             style = MaterialTheme.typography.headlineLarge,
-                            color = colorScheme.primary,
+                            color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.align(Alignment.Center)
                         )
                     }
@@ -116,12 +139,14 @@ fun QuickScreen() {
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     Button(
-                        colors = buttonColors(
-                            containerColor = if (isPaused) colorScheme.primary else colorScheme.outline
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (isPaused)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.outline
                         ),
-                        onClick = {
-                        isPaused = !isPaused
-                    }) {
+                        onClick = { viewModel.togglePause() }
+                    ) {
                         Text(
                             text = if (isPaused) "Resume" else "Pause",
                             Modifier.padding(6.dp),
@@ -129,12 +154,11 @@ fun QuickScreen() {
                         )
                     }
                     Button(
-                        colors = buttonColors(containerColor = colorScheme.outline),
-                        onClick = {
-                            progress = 0
-                            timerRunning = false
-                            time = startTime
-                        }) {
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.outline
+                        ),
+                        onClick = { viewModel.stopTimer() }
+                    ) {
                         Text(
                             "Stop",
                             Modifier.padding(6.dp),
@@ -145,10 +169,4 @@ fun QuickScreen() {
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun Prev() {
-    QuickScreen()
 }
