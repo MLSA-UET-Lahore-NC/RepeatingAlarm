@@ -24,7 +24,7 @@ We welcome all contributions, whether you're fixing bugs, improving documentatio
 ### 1. Fork the Repository
 Click the **Fork** button at the top of this repository and clone the forked project to your local machine:
 ```bash
-git clone https://github.com/MLSA-UET-Lahore-NC/RepeatingAlarm.git
+git clone YOUR_OWN_FORKED_REPO_LINK_HERE
 ```
 
 ### 2. Set Up the Project
